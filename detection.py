@@ -31,21 +31,16 @@ def load_yolo():
     model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
     return model
 
-# Definisikan subset label yang diizinkan
-allowed_labels = {"person", "car", "motorbike", "bus", "truck", "train", "bicycle", "traffic light", "parking meter", "stop sign"} 
-
-# Fungsi untuk deteksi objek
-def detect_objects(model, image, allowed_labels):
+def detect_objects(model, image):
     results = model(image)
     labels, coords = results.xyxyn[0][:, -1].numpy(), results.xyxyn[0][:, :-1].numpy()
     height, width, _ = image.shape
 
     for i in range(len(labels)):
         label_name = model.names[int(labels[i])]
-        if label_name in allowed_labels:
-            x1, y1, x2, y2 = int(coords[i][0] * width), int(coords[i][1] * height), int(coords[i][2] * width), int(coords[i][3] * height)
-            cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(image, f"{label_name} {coords[i][-1]:.2f}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        x1, y1, x2, y2 = int(coords[i][0] * width), int(coords[i][1] * height), int(coords[i][2] * width), int(coords[i][3] * height)
+        cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(image, f"{label_name} {coords[i][-1]:.2f}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
     
     return image
 
@@ -66,6 +61,7 @@ def detect_video(model, video_path, allowed_labels):
 
     cap.release()
     out.release()
+    
     return output_video_path
 
 # VideoTransformerBase subclass for real-time object detection
