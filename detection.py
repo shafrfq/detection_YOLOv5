@@ -27,7 +27,7 @@ def download_file(url, output_path, expected_size=None):
 
 # Mengunduh model YOLOv5
 def load_yolo():
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True, force_reload=True)
     return model
 
 # Definisikan subset label yang diizinkan
