@@ -3,14 +3,19 @@ import cv2
 import numpy as np
 import os
 import tempfile
+import requests
+import logging
 import torch
-from pathlib import Path
 from streamlit_webrtc import webrtc_streamer, VideoTransformerBase, RTCConfiguration
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Fungsi untuk mengunduh file jika belum ada atau unduhan sebelumnya tidak lengkap
 def download_file(url, output_path, expected_size=None):
     if not os.path.exists(output_path) or (expected_size and os.path.getsize(output_path) < expected_size):
-        st.write(f"Downloading {url} to {output_path}...")
+        logger.info(f"Downloading {url} to {output_path}...")
         try:
             response = requests.get(url, stream=True)
             with open(output_path, 'wb') as f:
@@ -23,19 +28,30 @@ def download_file(url, output_path, expected_size=None):
 # Mengunduh model YOLOv5
 @st.cache_resource
 def load_yolo():
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
     return model
 
 # Definisikan subset label yang diizinkan
-allowed_labels = {"person", "car", "motorbike", "bus", "truck", "train", "bicycle", "traffic light", "parking meter", "stop sign"}
+allowed_labels = {"person", "car", "motorbike", "bus", "truck", "train", "bicycle", "traffic light", "parking meter", "stop sign"} 
 
-# Fungsi untuk deteksi objek menggunakan YOLOv5
+# Fungsi untuk deteksi objek
 def detect_objects(model, image, allowed_labels):
     results = model(image)
-    detected_image = np.squeeze(results.render())  # Render results on image
-    return detected_image
+    labels, coords = results.xyxyn[0][:, -1].numpy(), results.xyxyn[0][:, :-1].numpy()
+    height, width, _ = image.shape
 
-# Fungsi untuk deteksi objek di video menggunakan YOLOv5
+    for i in range(len(labels)):
+        label_name = model.names[int(labels[i])]
+        if label_name in allowed_labels:
+            x1, y1, x2, y2 = int(coords[i][0] * width), int(coords[i][1] * height), int(coords[i][2] * width), int(coords[i][3] * height)
+            cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(image, f"{label_name} {coords[i][-1]:.2f}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        else:
+            logger.info(f"Detected label '{label_name}' is not in allowed labels")
+
+    return image
+
+# Fungsi untuk deteksi objek di video
 def detect_video(model, video_path, allowed_labels):
     cap = cv2.VideoCapture(video_path)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
