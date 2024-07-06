@@ -12,7 +12,7 @@ from streamlit_webrtc import webrtc_streamer, VideoTransformerBase, RTCConfigura
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Fungsi untuk mengunduh file jika belum ada atau unduhan sebelumnya tidak lengkap
+# Function to download a file if not already present or incomplete
 def download_file(url, output_path, expected_size=None):
     if not os.path.exists(output_path) or (expected_size and os.path.getsize(output_path) < expected_size):
         logger.info(f"Downloading {url} to {output_path}...")
@@ -25,26 +25,19 @@ def download_file(url, output_path, expected_size=None):
         except Exception as e:
             st.error(f"Error downloading {url}: {e}")
 
-# Fungsi untuk mengunduh model YOLOv5 dari GitHub
-def download_yolov5_model():
-    url = "https://github.com/shafrfq/detection_YOLOv5/blob/main/yolov5s.pt"
-    output_path = "yolov5/yolov5s.pt"  # Sesuaikan dengan struktur folder Anda
-    download_file(url, output_path)
-
-# Mengunduh model YOLOv5
-@st.cache(suppress_st_warning=True)
+# Download YOLOv5 model
+@st.cache(show_spinner=False)
 def load_yolo():
-    # Memanggil fungsi untuk mengunduh model jika belum ada
-    download_yolov5_model()
-
-    # Memuat model YOLOv5
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=False)
+    model_url = "https://ultralytics.com/yolov5s.pt"  # Example URL for YOLOv5s, replace with valid URL
+    model_path = "/tmp/yolov5s.pt"  # Temporary path to store the downloaded model
+    download_file(model_url, model_path)
+    model = torch.hub.load('ultralytics/yolov5', 'custom', path=model_path, force_reload=True)
     return model
 
-# Definisikan subset label yang diizinkan
+# Define subset of allowed labels
 allowed_labels = {"person", "car", "motorbike", "bus", "truck", "train", "bicycle", "traffic light", "parking meter", "stop sign"} 
 
-# Fungsi untuk deteksi objek
+# Function for object detection
 def detect_objects(model, image, allowed_labels):
     results = model(image)
     labels, coords = results.xyxyn[0][:, -1].numpy(), results.xyxyn[0][:, :-1].numpy()
@@ -59,7 +52,7 @@ def detect_objects(model, image, allowed_labels):
     
     return image
 
-# Fungsi untuk deteksi objek di video
+# Function for video object detection
 def detect_video(model, video_path, allowed_labels):
     cap = cv2.VideoCapture(video_path)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -89,7 +82,7 @@ class YOLOv5VideoTransformer(VideoTransformerBase):
         detected_image = detect_objects(self.model, image, self.allowed_labels)
         return detected_image
 
-# Fungsi utama untuk aplikasi Streamlit
+# Main function for Streamlit application
 def main():
     st.title("Object Detection using YOLOv5")
     st.write("Upload an image, video, or use your webcam for object detection")
@@ -111,7 +104,7 @@ def main():
                 detected_image = detect_objects(model, image, allowed_labels)
                 st.image(detected_image, channels="BGR", caption='Detected Image.', use_column_width=True)
 
-                # Opsi unduh gambar hasil deteksi
+                # Download button for the detected image
                 is_success, buffer = cv2.imencode(".jpg", detected_image)
                 if is_success:
                     st.download_button(
@@ -121,7 +114,7 @@ def main():
                         mime="image/jpeg"
                     )
 
-                # Opsi kembali ke tampilan awal
+                # Back to start button
                 if st.button("Back to Start"):
                     st.experimental_rerun()
 
@@ -144,7 +137,7 @@ def main():
                         mime="video/mp4"
                     )
 
-                # Opsi kembali ke tampilan awal
+                # Back to start button
                 if st.button("Back to Start"):
                     st.experimental_rerun()
 
