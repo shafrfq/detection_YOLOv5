@@ -26,8 +26,9 @@ def download_file(url, output_path, expected_size=None):
             st.error(f"Error downloading {url}: {e}")
 
 # Mengunduh model YOLOv5
+@st.cache_resource
 def load_yolo():
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True, force_reload=True)
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
     return model
 
 # Definisikan subset label yang diizinkan
@@ -45,9 +46,7 @@ def detect_objects(model, image, allowed_labels):
             x1, y1, x2, y2 = int(coords[i][0] * width), int(coords[i][1] * height), int(coords[i][2] * width), int(coords[i][3] * height)
             cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.putText(image, f"{label_name} {coords[i][-1]:.2f}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-        else:
-            logger.info(f"Detected label '{label_name}' is not in allowed labels")
-
+    
     return image
 
 # Fungsi untuk deteksi objek di video
