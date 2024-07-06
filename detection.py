@@ -166,4 +166,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-st.caption('Copyright (C) Shafira Fimelita Q - 2024')
+st.caption('Copyright (C) Shafira Fimelita Q - 2024')  
