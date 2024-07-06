@@ -27,7 +27,7 @@ def download_file(url, output_path, expected_size=None):
 
 # Fungsi untuk mengunduh model YOLOv5 dari GitHub
 def download_yolov5_model():
-    url = "https://github.com/your_username/your_repo/raw/main/yolov5s.pt"
+    url = "https://github.com/shafrfq/detection_YOLOv5/raw/main/yolov5s.pt"
     output_path = "yolov5/yolov5s.pt"  # Sesuaikan dengan struktur folder Anda
     download_file(url, output_path)
 
