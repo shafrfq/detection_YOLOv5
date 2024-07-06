@@ -1,9 +1,0 @@
-streamlit
-opencv-python-headless
-numpy
-requests
-torch
-torchvision
-streamlit-webrtc
-pandas
-matplotlib
