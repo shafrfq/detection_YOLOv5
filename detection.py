@@ -28,7 +28,7 @@ def download_file(url, output_path, expected_size=None):
 # Mengunduh model YOLOv5
 @st.cache_resource
 def load_yolo():
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
+    model = torch.hub.load('ultralytics/yolov5', 'custom', path='yolov5s.pt', force_reload=True)
     return model
 
 def detect_objects(model, image):
