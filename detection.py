@@ -28,8 +28,8 @@ def download_file(url, output_path, expected_size=None):
 # Download YOLOv5 model
 @st.cache(show_spinner=False)
 def load_yolo():
-    model_url = "https://ultralytics.com/yolov5s.pt"  # Example URL for YOLOv5s, replace with valid URL
-    model_path = "/tmp/yolov5s.pt"  # Temporary path to store the downloaded model
+    model_url = "https://example.com/path/to/yolov5s.pt"  # Replace with your model URL
+    model_path = "/tmp/yolov5s.pt"
     download_file(model_url, model_path)
     model = torch.hub.load('ultralytics/yolov5', 'custom', path=model_path, force_reload=True)
     return model
