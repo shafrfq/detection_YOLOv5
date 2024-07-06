@@ -25,8 +25,7 @@ def download_file(url, output_path, expected_size=None):
         except Exception as e:
             st.error(f"Error downloading {url}: {e}")
 
-# Mengunduh model YOLOv5
-@st.cache_resource
+# Mengunduh model YOLOv5 tanpa caching
 def load_yolo():
     model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
     return model
@@ -84,7 +83,11 @@ def main():
     st.title("Object Detection using YOLOv5")
     st.write("Upload an image, video, or use your webcam for object detection")
 
-    model = load_yolo()
+    try:
+        model = load_yolo()
+    except Exception as e:
+        st.error(f"Error loading YOLOv5 model: {e}")
+        return
 
     option = st.selectbox('Choose an option:', ('Image', 'Video', 'Webcam'))
 
