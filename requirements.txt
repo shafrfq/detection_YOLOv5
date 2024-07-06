@@ -4,6 +4,7 @@ numpy
 requests
 torch
 torchvision
+ultralytics
 streamlit-webrtc
 pandas
 matplotlib
