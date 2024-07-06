@@ -26,7 +26,6 @@ def download_file(url, output_path, expected_size=None):
             st.error(f"Error downloading {url}: {e}")
 
 # Mengunduh model YOLOv5
-@st.cache_resource
 def load_yolo():
     model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
     return model
